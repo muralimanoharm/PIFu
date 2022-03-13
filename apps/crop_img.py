@@ -68,8 +68,8 @@ def main():
 
     img_name = Path(args.input_image).stem
 
-    cv2.imwrite(os.path.join(args.out_path, img_name + '.png'), img_new)
-    cv2.imwrite(os.path.join(args.out_path, img_name + '_mask.png'), msk_new)
+    cv2.imwrite(os.path.join(args.out_path, f'{img_name}.png'), img_new)
+    cv2.imwrite(os.path.join(args.out_path, f'{img_name}_mask.png'), msk_new)
 
 if __name__ == "__main__":
     main()

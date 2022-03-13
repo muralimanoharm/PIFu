@@ -119,11 +119,13 @@ class HGPIFuNet(BasePIFuNet):
         '''
         Hourglass has its own intermediate supervision scheme
         '''
-        error = 0
-        for preds in self.intermediate_preds_list:
-            error += self.error_term(preds, self.labels)
+        error = sum(
+            self.error_term(preds, self.labels)
+            for preds in self.intermediate_preds_list
+        )
+
         error /= len(self.intermediate_preds_list)
-        
+
         return error
 
     def forward(self, images, points, calibs, transforms=None, labels=None):

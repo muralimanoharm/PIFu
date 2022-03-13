@@ -6,7 +6,7 @@ from .cam_render import CamRender
 
 class PRTRender(CamRender):
     def __init__(self, width=1600, height=1200, name='PRT Renderer', uv_mode=False, ms_rate=1, egl=False):
-        program_files = ['prt.vs', 'prt.fs'] if not uv_mode else ['prt_uv.vs', 'prt_uv.fs']
+        program_files = ['prt_uv.vs', 'prt_uv.fs'] if uv_mode else ['prt.vs', 'prt.fs']
         CamRender.__init__(self, width, height, name, program_files=program_files, color_size=8, ms_rate=ms_rate, egl=egl)
 
         # WARNING: this differs from vertex_buffer and vertex_data in Render
@@ -25,7 +25,7 @@ class PRTRender(CamRender):
         self.prt1_buffer = {}
         self.prt1_data = {}
         self.prt2_buffer = {}
-        self.prt2_data = {}        
+        self.prt2_data = {}
         self.prt3_buffer = {}
         self.prt3_data = {}
 

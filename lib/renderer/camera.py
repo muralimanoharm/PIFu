@@ -51,8 +51,7 @@ class Camera:
         z_near = self.near
         z_far = self.far
         z_n = 2.0 * z - 1.0
-        z_e = 2.0 * z_near * z_far / (z_far + z_near - z_n * (z_far - z_near))
-        return z_e
+        return 2.0 * z_near * z_far / (z_far + z_near - z_n * (z_far - z_near))
 
     def get_rotation_matrix(self):
         rot_mat = np.eye(3)
@@ -68,8 +67,7 @@ class Camera:
 
     def get_translation_vector(self):
         rot_mat = self.get_rotation_matrix()
-        trans = -np.dot(rot_mat, self.center)
-        return trans
+        return -np.dot(rot_mat, self.center)
 
     def get_intrinsic_matrix(self):
         int_mat = np.eye(3)
@@ -114,7 +112,7 @@ class Camera:
     def set_projection_matrix(self, proj_mat):
         res = cv2.decomposeProjectionMatrix(proj_mat)
         int_mat, rot_mat, camera_center_homo = res[0], res[1], res[2]
-        camera_center = camera_center_homo[0:3] / camera_center_homo[3]
+        camera_center = camera_center_homo[:3] / camera_center_homo[3]
         camera_center = camera_center.reshape(-1)
         int_mat = int_mat / int_mat[2][2]
 
@@ -160,7 +158,7 @@ class Camera:
 def KRT_from_P(proj_mat, normalize_K=True):
     res = cv2.decomposeProjectionMatrix(proj_mat)
     K, Rot, camera_center_homog = res[0], res[1], res[2]
-    camera_center = camera_center_homog[0:3] / camera_center_homog[3]
+    camera_center = camera_center_homog[:3] / camera_center_homog[3]
     trans = -Rot.dot(camera_center)
     if normalize_K:
         K = K / K[2][2]
@@ -179,7 +177,7 @@ def MVP_from_P(proj_mat, width, height, near=0.1, far=10000):
     '''
     res = cv2.decomposeProjectionMatrix(proj_mat)
     K, Rot, camera_center_homog = res[0], res[1], res[2]
-    camera_center = camera_center_homog[0:3] / camera_center_homog[3]
+    camera_center = camera_center_homog[:3] / camera_center_homog[3]
     trans = -Rot.dot(camera_center)
     K = K / K[2][2]
 

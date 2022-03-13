@@ -57,7 +57,7 @@ class ConvPIFuNet(BasePIFuNet):
         elif opt.netIMF == 'vgg16':
             net = Vgg16()
         else:
-            raise NotImplementedError('model name [%s] is not recognized' % opt.imf_type)
+            raise NotImplementedError(f'model name [{opt.imf_type}] is not recognized')
 
         return net
 

@@ -41,7 +41,12 @@ def loadShader(shaderType, shaderFile):
         elif shaderType is GL_FRAGMENT_SHADER:
             strShaderType = "fragment"
 
-        print("Compilation failure for " + strShaderType + " shader:\n" + str(strInfoLog))
+        print(
+            f"Compilation failure for {strShaderType}"
+            + " shader:\n"
+            + str(strInfoLog)
+        )
+
 
     return shader
 
@@ -76,7 +81,7 @@ def findFileOrThrow(strBasename):
     if os.path.isfile(strBasename):
         return strBasename
 
-    LOCAL_FILE_DIR = "data" + os.sep
+    LOCAL_FILE_DIR = f"data{os.sep}"
     GLOBAL_FILE_DIR = os.path.dirname(os.path.abspath(__file__)) + os.sep + "data" + os.sep
 
     strFilename = LOCAL_FILE_DIR + strBasename
@@ -87,4 +92,4 @@ def findFileOrThrow(strBasename):
     if os.path.isfile(strFilename):
         return strFilename
 
-    raise IOError('Could not find target file ' + strBasename)
+    raise IOError(f'Could not find target file {strBasename}')

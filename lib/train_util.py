@@ -50,7 +50,7 @@ def gen_mesh(opt, net, cuda, data, save_path, use_octree=True):
     b_min = data['b_min']
     b_max = data['b_max']
     try:
-        save_img_path = save_path[:-4] + '.png'
+        save_img_path = f'{save_path[:-4]}.png'
         save_img_list = []
         for v in range(image_tensor.shape[0]):
             save_img = (np.transpose(image_tensor[v].detach().cpu().numpy(), (1, 2, 0)) * 0.5 + 0.5)[:, :, ::-1] * 255.0
@@ -81,7 +81,7 @@ def gen_mesh_color(opt, netG, netC, cuda, data, save_path, use_octree=True):
     b_min = data['b_min']
     b_max = data['b_max']
     try:
-        save_img_path = save_path[:-4] + '.png'
+        save_img_path = f'{save_path[:-4]}.png'
         save_img_list = []
         for v in range(image_tensor.shape[0]):
             save_img = (np.transpose(image_tensor[v].detach().cpu().numpy(), (1, 2, 0)) * 0.5 + 0.5)[:, :, ::-1] * 255.0
@@ -147,8 +147,7 @@ def compute_acc(pred, gt, thresh=0.5):
 
 
 def calc_error(opt, net, cuda, dataset, num_tests):
-    if num_tests > len(dataset):
-        num_tests = len(dataset)
+    num_tests = min(num_tests, len(dataset))
     with torch.no_grad():
         erorr_arr, IOU_arr, prec_arr, recall_arr = [], [], [], []
         for idx in tqdm(range(num_tests)):
@@ -176,8 +175,7 @@ def calc_error(opt, net, cuda, dataset, num_tests):
     return np.average(erorr_arr), np.average(IOU_arr), np.average(prec_arr), np.average(recall_arr)
 
 def calc_error_color(opt, netG, netC, cuda, dataset, num_tests):
-    if num_tests > len(dataset):
-        num_tests = len(dataset)
+    num_tests = min(num_tests, len(dataset))
     with torch.no_grad():
         error_color_arr = []
 

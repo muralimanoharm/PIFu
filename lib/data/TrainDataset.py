@@ -16,9 +16,12 @@ log.setLevel(40)
 def load_trimesh(root_dir):
     folders = os.listdir(root_dir)
     meshs = {}
-    for i, f in enumerate(folders):
+    for f in folders:
         sub_name = f
-        meshs[sub_name] = trimesh.load(os.path.join(root_dir, f, '%s_100k.obj' % sub_name))
+        meshs[sub_name] = trimesh.load(
+            os.path.join(root_dir, f, f'{sub_name}_100k.obj')
+        )
+
 
     return meshs
 
@@ -78,7 +81,7 @@ class TrainDataset(Dataset):
         self.num_sample_inout = self.opt.num_sample_inout
         self.num_sample_color = self.opt.num_sample_color
 
-        self.yaw_list = list(range(0,360,1))
+        self.yaw_list = list(range(360))
         self.pitch_list = [0]
         self.subjects = self.get_subjects()
 
@@ -323,7 +326,10 @@ class TrainDataset(Dataset):
         surface_normal = uv_normal[uv_mask]
 
         if self.num_sample_color:
-            sample_list = random.sample(range(0, surface_points.shape[0] - 1), self.num_sample_color)
+            sample_list = random.sample(
+                range(surface_points.shape[0] - 1), self.num_sample_color
+            )
+
             surface_points = surface_points[sample_list].T
             surface_colors = surface_colors[sample_list].T
             surface_normal = surface_normal[sample_list].T
@@ -353,13 +359,14 @@ class TrainDataset(Dataset):
         subject = self.subjects[sid]
         res = {
             'name': subject,
-            'mesh_path': os.path.join(self.OBJ, subject + '.obj'),
+            'mesh_path': os.path.join(self.OBJ, f'{subject}.obj'),
             'sid': sid,
             'yid': yid,
             'pid': pid,
             'b_min': self.B_MIN,
             'b_max': self.B_MAX,
         }
+
         render_data = self.get_render(subject, num_views=self.num_views, yid=yid, pid=pid,
                                         random_sample=self.opt.random_multiview)
         res.update(render_data)
@@ -367,7 +374,7 @@ class TrainDataset(Dataset):
         if self.opt.num_sample_inout:
             sample_data = self.select_sampling_method(subject)
             res.update(sample_data)
-        
+
         # img = np.uint8((np.transpose(render_data['img'][0].numpy(), (1, 2, 0)) * 0.5 + 0.5)[:, :, ::-1] * 255.0)
         # rot = render_data['calib'][0,:3, :3]
         # trans = render_data['calib'][0,:3, 3:4]

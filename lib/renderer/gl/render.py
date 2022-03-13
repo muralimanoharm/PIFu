@@ -14,7 +14,7 @@ class Render:
         self.name = name
         self.use_inverse_depth = False
         self.egl = egl
-        
+
         glEnable(GL_DEPTH_TEST)
 
         glClampColor(GL_CLAMP_READ_COLOR, GL_FALSE)
@@ -52,6 +52,7 @@ class Render:
         glBindFramebuffer(GL_FRAMEBUFFER, self.frame_buffer)
 
         self.intermediate_fbo = None
+        attachments = []
         if ms_rate > 1:
             # Configure texture buffer to render to
             self.color_buffer = []
@@ -74,9 +75,7 @@ class Render:
             glBindRenderbuffer(GL_RENDERBUFFER, 0)
             glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, self.render_buffer)
 
-            attachments = []
-            for i in range(color_size):
-                attachments.append(GL_COLOR_ATTACHMENT0 + i)
+            attachments.extend(GL_COLOR_ATTACHMENT0 + i for i in range(color_size))
             glDrawBuffers(color_size, attachments)
             glBindFramebuffer(GL_FRAMEBUFFER, 0)
 
@@ -94,7 +93,6 @@ class Render:
                 self.screen_texture.append(screen_texture)
 
             glDrawBuffers(color_size, attachments)
-            glBindFramebuffer(GL_FRAMEBUFFER, 0)
         else:
             self.color_buffer = []
             for i in range(color_size):
@@ -107,7 +105,7 @@ class Render:
                 glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, self.width, self.height, 0, GL_RGBA, GL_FLOAT, None)
                 glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, color_buffer, 0)
                 self.color_buffer.append(color_buffer)
- 
+
             # Configure depth texture map to render to
             self.depth_buffer = glGenTextures(1)
             glBindTexture(GL_TEXTURE_2D, self.depth_buffer)
@@ -121,15 +119,11 @@ class Render:
             glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, self.width, self.height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, None)
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, self.depth_buffer, 0)
 
-            attachments = []
-            for i in range(color_size):
-                attachments.append(GL_COLOR_ATTACHMENT0 + i)
+            attachments.extend(GL_COLOR_ATTACHMENT0 + i for i in range(color_size))
             glDrawBuffers(color_size, attachments)
             self.screen_texture = self.color_buffer
 
-            glBindFramebuffer(GL_FRAMEBUFFER, 0)
-
-        
+        glBindFramebuffer(GL_FRAMEBUFFER, 0)
         # Configure texture buffer if needed
         self.render_texture = None
 
@@ -152,9 +146,8 @@ class Render:
 
 
     def init_quad_program(self):
-        shader_list = []
+        shader_list = [loadShader(GL_VERTEX_SHADER, "quad.vs")]
 
-        shader_list.append(loadShader(GL_VERTEX_SHADER, "quad.vs"))
         shader_list.append(loadShader(GL_FRAGMENT_SHADER, "quad.fs"))
 
         the_program = createProgram(shader_list)
