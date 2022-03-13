@@ -8,9 +8,7 @@ from PIL import Image, ImageFilter
 
 class RandomVerticalFlip(object):
     def __call__(self, img):
-        if random.random() < 0.5:
-            return img.transpose(Image.FLIP_TOP_BOTTOM)
-        return img
+        return img.transpose(Image.FLIP_TOP_BOTTOM) if random.random() < 0.5 else img
 
 
 class DeNormalize(object):

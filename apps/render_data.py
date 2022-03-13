@@ -44,8 +44,7 @@ def make_rotate(rx, ry, rz):
     Rz[1, 1] = cosZ
     Rz[2, 2] = 1.0
 
-    R = np.matmul(np.matmul(Rz,Ry),Rx)
-    return R
+    return np.matmul(np.matmul(Rz,Ry),Rx)
 
 def rotateSH(SH, R):
     SHn = SH
@@ -152,10 +151,10 @@ def render_prt_ortho(out_path, folder_name, subject_name, shs, rndr, rndr_uv, im
     cam.sanity_check()
 
     # set path for obj, prt
-    mesh_file = os.path.join(folder_name, subject_name + '_100k.obj')
+    mesh_file = os.path.join(folder_name, f'{subject_name}_100k.obj')
     if not os.path.exists(mesh_file):
         print('ERROR: obj file does not exist!!', mesh_file)
-        return 
+        return
     prt_file = os.path.join(folder_name, 'bounce', 'bounce0.txt')
     if not os.path.exists(prt_file):
         print('ERROR: prt file does not exist!!!', prt_file)
@@ -176,7 +175,7 @@ def render_prt_ortho(out_path, folder_name, subject_name, shs, rndr, rndr_uv, im
     vmin = vertices.min(0)
     vmax = vertices.max(0)
     up_axis = 1 if (vmax-vmin).argmax() == 1 else 2
-    
+
     vmed = np.median(vertices, 0)
     vmed[up_axis] = 0.5*(vmax[up_axis]+vmin[up_axis])
     y_scale = 180/(vmax[up_axis] - vmin[up_axis])
@@ -187,10 +186,10 @@ def render_prt_ortho(out_path, folder_name, subject_name, shs, rndr, rndr_uv, im
     tan, bitan = compute_tangent(vertices, faces, normals, textures, face_textures)
     prt = np.loadtxt(prt_file)
     face_prt = np.load(face_prt_file)
-    rndr.set_mesh(vertices, faces, normals, faces_normals, textures, face_textures, prt, face_prt, tan, bitan)    
+    rndr.set_mesh(vertices, faces, normals, faces_normals, textures, face_textures, prt, face_prt, tan, bitan)
     rndr.set_albedo(texture_image)
 
-    rndr_uv.set_mesh(vertices, faces, normals, faces_normals, textures, face_textures, prt, face_prt, tan, bitan)   
+    rndr_uv.set_mesh(vertices, faces, normals, faces_normals, textures, face_textures, prt, face_prt, tan, bitan)
     rndr_uv.set_albedo(texture_image)
 
     os.makedirs(os.path.join(out_path, 'GEO', 'OBJ', subject_name),exist_ok=True)
@@ -207,7 +206,7 @@ def render_prt_ortho(out_path, folder_name, subject_name, shs, rndr, rndr_uv, im
         f.close()
 
     # copy obj file
-    cmd = 'cp %s %s' % (mesh_file, os.path.join(out_path, 'GEO', 'OBJ', subject_name))
+    cmd = f"cp {mesh_file} {os.path.join(out_path, 'GEO', 'OBJ', subject_name)}"
     print(cmd)
     os.system(cmd)
 
@@ -229,7 +228,7 @@ def render_prt_ortho(out_path, folder_name, subject_name, shs, rndr, rndr_uv, im
                 sh = rotateSH(sh, make_rotate(0, sh_angle, 0).T)
 
                 dic = {'sh': sh, 'ortho_ratio': cam.ortho_ratio, 'scale': y_scale, 'center': vmed, 'R': R}
-                
+
                 rndr.set_sh(sh)        
                 rndr.analytic = False
                 rndr.use_inverse_depth = False

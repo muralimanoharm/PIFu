@@ -51,5 +51,4 @@ def perspective(points, calibrations, transforms=None):
         shift = transforms[:2, 2:3]
         xy = torch.baddbmm(shift, scale, xy)
 
-    xyz = torch.cat([xy, homo[:, 2:3, :]], 1)
-    return xyz
+    return torch.cat([xy, homo[:, 2:3, :]], 1)

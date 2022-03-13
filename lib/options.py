@@ -141,8 +141,7 @@ class BaseOptions():
         return parser.parse_args()
 
     def print_options(self, opt):
-        message = ''
-        message += '----------------- Options ---------------\n'
+        message = '' + '----------------- Options ---------------\n'
         for k, v in sorted(vars(opt).items()):
             comment = ''
             default = self.parser.get_default(k)
@@ -153,5 +152,4 @@ class BaseOptions():
         print(message)
 
     def parse(self):
-        opt = self.gather_options()
-        return opt
+        return self.gather_options()

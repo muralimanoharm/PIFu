@@ -7,13 +7,12 @@ import argparse
 from tqdm import tqdm
 
 def factratio(N, D):
+    prod = 1.0
     if N >= D:
-        prod = 1.0
         for i in range(D+1, N+1):
             prod *= i
         return prod
     else:
-        prod = 1.0
         for i in range(N+1, D+1):
             prod *= i
         return 1.0 / prod
@@ -24,28 +23,26 @@ def KVal(M, L):
 def AssociatedLegendre(M, L, x):
     if M < 0 or M > L or np.max(np.abs(x)) > 1.0:
         return np.zeros_like(x)
-    
+
     pmm = np.ones_like(x)
     if M > 0:
         somx2 = np.sqrt((1.0 + x) * (1.0 - x))
         fact = 1.0
-        for i in range(1, M+1):
+        for _ in range(1, M+1):
             pmm = -pmm * fact * somx2
             fact = fact + 2
-    
+
     if L == M:
         return pmm
-    else:
-        pmmp1 = x * (2 * M + 1) * pmm
-        if L == M+1:
-            return pmmp1
-        else:
-            pll = np.zeros_like(x)
-            for i in range(M+2, L+1):
-                pll = (x * (2 * i - 1) * pmmp1 - (i + M - 1) * pmm) / (i - M)
-                pmm = pmmp1
-                pmmp1 = pll
-            return pll
+    pmmp1 = x * (2 * M + 1) * pmm
+    if L == M+1:
+        return pmmp1
+    pll = np.zeros_like(x)
+    for i in range(M+2, L+1):
+        pll = (x * (2 * i - 1) * pmmp1 - (i + M - 1) * pmm) / (i - M)
+        pmm = pmmp1
+        pmmp1 = pll
+    return pll
 
 def SphericalHarmonic(M, L, theta, phi):
     if M > 0:
@@ -56,10 +53,9 @@ def SphericalHarmonic(M, L, theta, phi):
         return KVal(0, L) * AssociatedLegendre(0, L, np.cos(theta))
 
 def save_obj(mesh_path, verts):
-    file = open(mesh_path, 'w')    
-    for v in verts:
-        file.write('v %.4f %.4f %.4f\n' % (v[0], v[1], v[2]))
-    file.close()
+    with open(mesh_path, 'w') as file:
+        for v in verts:
+            file.write('v %.4f %.4f %.4f\n' % (v[0], v[1], v[2]))
 
 def sampleSphericalDirections(n):
     xv = np.random.rand(n,n)
@@ -77,11 +73,11 @@ def sampleSphericalDirections(n):
 
 def getSHCoeffs(order, phi, theta):
     shs = []
-    for n in range(0, order+1):
+    for n in range(order+1):
         for m in range(-n,n+1):
             s = SphericalHarmonic(m, n, theta, phi)
             shs.append(s)
-    
+
     return np.stack(shs, 1)
 
 def computePRT(mesh_path, n, order):
@@ -126,7 +122,7 @@ def testPRT(dir_path, n=40):
     if dir_path[-1] == '/':
         dir_path = dir_path[:-1]
     sub_name = dir_path.split('/')[-1][:-4]
-    obj_path = os.path.join(dir_path, sub_name + '_100k.obj')
+    obj_path = os.path.join(dir_path, f'{sub_name}_100k.obj')
     os.makedirs(os.path.join(dir_path, 'bounce'), exist_ok=True)
 
     PRT, F = computePRT(obj_path, n, 2)

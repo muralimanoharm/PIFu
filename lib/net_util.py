@@ -56,7 +56,7 @@ def gen_mesh(opt, net, cuda, data, save_path, use_octree=True):
     b_min = data['b_min']
     b_max = data['b_max']
     try:
-        save_img_path = save_path[:-4] + '.png'
+        save_img_path = f'{save_path[:-4]}.png'
         save_img_list = []
         for v in range(image_tensor.shape[0]):
             save_img = (np.transpose(image_tensor[v].detach().cpu().numpy(), (1, 2, 0)) * 0.5 + 0.5)[:, :, ::-1] * 255.0
@@ -87,7 +87,7 @@ def gen_mesh_color(opt, netG, netC, cuda, data, save_path, use_octree=True):
     b_min = data['b_min']
     b_max = data['b_max']
     try:
-        save_img_path = save_path[:-4] + '.png'
+        save_img_path = f'{save_path[:-4]}.png'
         save_img_list = []
         for v in range(image_tensor.shape[0]):
             save_img = (np.transpose(image_tensor[v].detach().cpu().numpy(), (1, 2, 0)) * 0.5 + 0.5)[:, :, ::-1] * 255.0
@@ -154,8 +154,7 @@ def compute_acc(pred, gt, thresh=0.5):
 
 
 def calc_error(opt, net, cuda, dataset, num_tests):
-    if num_tests > len(dataset):
-        num_tests = len(dataset)
+    num_tests = min(num_tests, len(dataset))
     with torch.no_grad():
         erorr_arr, IOU_arr, prec_arr, recall_arr = [], [], [], []
         for idx in tqdm(range(num_tests)):
@@ -183,8 +182,7 @@ def calc_error(opt, net, cuda, dataset, num_tests):
     return np.average(erorr_arr), np.average(IOU_arr), np.average(prec_arr), np.average(recall_arr)
 
 def calc_error_color(opt, netG, netC, cuda, dataset, num_tests):
-    if num_tests > len(dataset):
-        num_tests = len(dataset)
+    num_tests = min(num_tests, len(dataset))
     with torch.no_grad():
         error_color_arr = []
 
@@ -230,16 +228,19 @@ def init_weights(net, init_type='normal', init_gain=0.02):
     def init_func(m):  # define the initialization function
         classname = m.__class__.__name__
         if hasattr(m, 'weight') and (classname.find('Conv') != -1 or classname.find('Linear') != -1):
-            if init_type == 'normal':
-                init.normal_(m.weight.data, 0.0, init_gain)
-            elif init_type == 'xavier':
-                init.xavier_normal_(m.weight.data, gain=init_gain)
-            elif init_type == 'kaiming':
+            if init_type == 'kaiming':
                 init.kaiming_normal_(m.weight.data, a=0, mode='fan_in')
+            elif init_type == 'normal':
+                init.normal_(m.weight.data, 0.0, init_gain)
             elif init_type == 'orthogonal':
                 init.orthogonal_(m.weight.data, gain=init_gain)
+            elif init_type == 'xavier':
+                init.xavier_normal_(m.weight.data, gain=init_gain)
             else:
-                raise NotImplementedError('initialization method [%s] is not implemented' % init_type)
+                raise NotImplementedError(
+                    f'initialization method [{init_type}] is not implemented'
+                )
+
             if hasattr(m, 'bias') and m.bias is not None:
                 init.constant_(m.bias.data, 0.0)
         elif classname.find(
@@ -307,7 +308,7 @@ def cal_gradient_penalty(netD, real_data, fake_data, device, type='mixed', const
             alpha = alpha.to(device)
             interpolatesv = alpha * real_data + ((1 - alpha) * fake_data)
         else:
-            raise NotImplementedError('{} not implemented'.format(type))
+            raise NotImplementedError(f'{type} not implemented')
         interpolatesv.requires_grad_(True)
         disc_interpolates = netD(interpolatesv)
         gradients = torch.autograd.grad(outputs=disc_interpolates, inputs=interpolatesv,
@@ -335,7 +336,7 @@ def get_norm_layer(norm_type='instance'):
     elif norm_type == 'none':
         norm_layer = None
     else:
-        raise NotImplementedError('normalization layer [%s] is not found' % norm_type)
+        raise NotImplementedError(f'normalization layer [{norm_type}] is not found')
     return norm_layer
 
 class Flatten(nn.Module):

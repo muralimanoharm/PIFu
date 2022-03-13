@@ -150,10 +150,11 @@ class EvalDataset(Dataset):
             subject = self.subjects[sid]
             res = {
                 'name': subject,
-                'mesh_path': os.path.join(self.OBJ, subject + '.obj'),
+                'mesh_path': os.path.join(self.OBJ, f'{subject}.obj'),
                 'sid': sid,
                 'vid': vid,
             }
+
             render_data = self.get_render(subject, num_views=self.num_views, view_id=vid,
                                           random_sample=self.opt.random_multiview)
             res.update(render_data)

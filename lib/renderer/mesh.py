@@ -2,13 +2,12 @@ import numpy as np
 
 
 def save_obj_mesh(mesh_path, verts, faces):
-    file = open(mesh_path, 'w')
-    for v in verts:
-        file.write('v %.4f %.4f %.4f\n' % (v[0], v[1], v[2]))
-    for f in faces:
-        f_plus = f + 1
-        file.write('f %d %d %d\n' % (f_plus[0], f_plus[1], f_plus[2]))
-    file.close()
+    with open(mesh_path, 'w') as file:
+        for v in verts:
+            file.write('v %.4f %.4f %.4f\n' % (v[0], v[1], v[2]))
+        for f in faces:
+            f_plus = f + 1
+            file.write('f %d %d %d\n' % (f_plus[0], f_plus[1], f_plus[2]))
 
 # https://github.com/ratcave/wavefront_reader
 def read_mtlfile(fname):
@@ -63,10 +62,7 @@ def load_obj_mesh_mtl(mesh_file):
     mtl_data = None
     cur_mat = None
 
-    if isinstance(mesh_file, str):
-        f = open(mesh_file, "r")
-    else:
-        f = mesh_file
+    f = open(mesh_file, "r") if isinstance(mesh_file, str) else mesh_file
     for line in f:
         if isinstance(line, bytes):
             line = line.decode("utf-8")
@@ -100,11 +96,9 @@ def load_obj_mesh_mtl(mesh_file):
                 f = list(map(lambda x: int(x.split('/')[0]) if int(x.split('/')[0]) < 0 else int(x.split('/')[0])-1, values[1:4]))
                 l_face_data.append(f)
                 f = list(map(lambda x: int(x.split('/')[0]) if int(x.split('/')[0]) < 0 else int(x.split('/')[0])-1, [values[3], values[4], values[1]]))
-                l_face_data.append(f)
-            # tri mesh
             else:
                 f = list(map(lambda x: int(x.split('/')[0]) if int(x.split('/')[0]) < 0 else int(x.split('/')[0])-1, values[1:4]))
-                l_face_data.append(f)
+            l_face_data.append(f)
             # deal with texture
             if len(values[1].split('/')) >= 2:
                 # quad mesh
@@ -129,7 +123,7 @@ def load_obj_mesh_mtl(mesh_file):
                 elif len(values[1].split('/')[2]) != 0:
                     f = list(map(lambda x: int(x.split('/')[2]) if int(x.split('/')[2]) < 0 else int(x.split('/')[2])-1, values[1:4]))
                     l_face_norm_data.append(f)
-            
+
             face_data += l_face_data
             face_uv_data += l_face_uv_data
             face_norm_data += l_face_norm_data
@@ -162,7 +156,7 @@ def load_obj_mesh_mtl(mesh_file):
             face_data_mat[key] = np.array(face_data_mat[key])
             face_uv_data_mat[key] = np.array(face_uv_data_mat[key])
             face_norm_data_mat[key] = np.array(face_norm_data_mat[key])
-        
+
         out_tuple += (face_data_mat, face_norm_data_mat, face_uv_data_mat, mtl_data)
 
     return out_tuple

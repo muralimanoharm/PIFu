@@ -10,7 +10,7 @@ class MultiConv(nn.Module):
         super(MultiConv, self).__init__()
         self.filters = []
 
-        for l in range(0, len(filter_channels) - 1):
+        for l in range(len(filter_channels) - 1):
             self.filters.append(
                 nn.Conv2d(filter_channels[l], filter_channels[l + 1], kernel_size=4, stride=2))
             self.add_module("conv%d" % l, self.filters[l])
@@ -97,9 +97,8 @@ class ResNet(nn.Module):
         '''
 
         y = image
-        feat_pyramid = []
         y = self.layer0(y)
-        feat_pyramid.append(y)
+        feat_pyramid = [y]
         y = self.layer1(self.pool(y))
         feat_pyramid.append(y)
         y = self.layer2(y)
